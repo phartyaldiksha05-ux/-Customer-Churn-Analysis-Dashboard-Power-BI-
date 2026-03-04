@@ -1,0 +1,80 @@
+========================================
+Customer Churn Dashboard – DAX Measures
+========================================
+
+
+----------------------------------------
+1. Total Customers
+----------------------------------------
+Total Customers =
+COUNT('Telco-Customer-Churn'[customerID])
+
+
+
+----------------------------------------
+2. Churned Customers
+----------------------------------------
+Churned Customers =
+CALCULATE(
+    COUNT('Telco-Customer-Churn'[customerID]),
+    'Telco-Customer-Churn'[Churn] = "Yes"
+)
+
+
+
+----------------------------------------
+3. Churn Rate %
+----------------------------------------
+Churn Rate % =
+DIVIDE(
+    [Churned Customers],
+    [Total Customers]
+)
+
+
+
+----------------------------------------
+4. Churn Risk Color (Conditional Formatting)
+----------------------------------------
+Churn Risk Color =
+VAR ChurnRate = [Churn Rate %]
+
+RETURN
+SWITCH(
+    TRUE(),
+    ChurnRate > 0.20, "#FF0000",      -- High Risk (Red)
+    ChurnRate > 0.10, "#FFA500",      -- Medium Risk (Orange)
+    "#008000"                         -- Low Risk (Green)
+)
+
+
+
+----------------------------------------
+5. Advanced Dynamic Insight (Executive Card)
+----------------------------------------
+Advanced Dynamic Insight =
+VAR TotalCustomers =
+    COUNT('Telco-Customer-Churn'[customerID])
+
+VAR ChurnedCustomers =
+    CALCULATE(
+        COUNT('Telco-Customer-Churn'[customerID]),
+        'Telco-Customer-Churn'[Churn] = "Yes"
+    )
+
+VAR ChurnRate =
+    DIVIDE(ChurnedCustomers, TotalCustomers)
+
+VAR RiskIcon =
+    SWITCH(
+        TRUE(),
+        ChurnRate > 0.20, "🔴 High Risk",
+        ChurnRate > 0.10, "🟡 Medium Risk",
+        "🟢 Low Risk"
+    )
+
+RETURN
+RiskIcon & UNICHAR(10) &
+"Out of " & TotalCustomers & " customers, " &
+ChurnedCustomers & " have churned (" &
+FORMAT(ChurnRate, "0.0%") & " churn rate)."
